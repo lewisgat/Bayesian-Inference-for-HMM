@@ -1,4 +1,4 @@
-library(mcmcse)
+
 
 HMM_Metropolis_Hastings <- function(x, iterations, Gamma0, tau0, alpha_gamma, alpha_tau, beta_tau){
   acc <- 0 # initialise acceptance count
@@ -16,35 +16,36 @@ HMM_Metropolis_Hastings <- function(x, iterations, Gamma0, tau0, alpha_gamma, al
     for (j in 1:m){       # simulate each row of gamma independently from a gamma distribution
       for (k in 1:m){     # with beta = 1. For each row, dividing each entry over the sum makes it equivalent to
         # drawing from a Dirichlet Distribution
-        Gamma_star[j, k] <- rgamma(n = 1, shape = alpha_gamma + (alpha_gamma * Gammas[j,k,i]), rate = 1)
+        Gamma_star[j, k] <- rgamma(n = 1, shape =  (alpha_gamma + Gammas[j,k,i]), rate = 1)
       }
       
       Gamma_star[j,] <-  Gamma_star[j,]/ sum(Gamma_star[j,])
       
-      tau_star[1, j] <-rgamma(1, shape = beta_tau + (beta_tau * taus[1,j,i]), rate = beta_tau) #draw Tau from Gamma Distribution
+      tau_star[1, j] <-rgamma(1, shape = (beta_tau + taus[1,j,i]), rate = beta_tau) #draw Tau from Gamma Distribution
     }
     
     
     
     
-    p <- HMM_Log_Likelihood(x, Gamma_star, cumsum(tau_star)) + # likelihood of proposal
-      - HMM_Log_Likelihood(x, Gammas[,,i], cumsum(taus[,,i])) # likelihood of current
-    print(p)
-    
+    p <- HMM_Log_Likelihood(x, Gamma_star, cumsum(tau_star)) - # likelihood of proposal
+         HMM_Log_Likelihood(x, Gammas[,,i], cumsum(taus[,,i])) # likelihood of current
+
     for (j in 1:m){
+
       for (k in 1:m){
-        p <- p
-        + (dgamma(Gammas[j,k,i], shape =alpha_gamma+( alpha_gamma * Gamma_star[j, k]), rate = 1, log = TRUE))
-        + (dgamma(Gamma_star[j, k], shape = alpha_gamma, rate = 1, log = TRUE))
-        - (dgamma(Gamma_star[j, k], shape = alpha_gamma+ ( alpha_gamma * Gammas[j,k,i]), rate = 1, log = TRUE))
-        - (dgamma(Gammas[j,k,i], shape = alpha_gamma, rate = 1, log = TRUE))
+        p <- p +
+        (dgamma(Gammas[j,k,i], shape = alpha_gamma + Gamma_star[j, k], rate = 1, log = TRUE)) +
+        (dgamma(Gamma_star[j, k], shape = alpha_gamma, rate = 1, log = TRUE)) -
+        (dgamma(Gamma_star[j, k], shape =  alpha_gamma + Gammas[j,k,i], rate = 1, log = TRUE)) -
+        (dgamma(Gammas[j,k,i], shape = alpha_gamma, rate = 1, log = TRUE))
+
       }
       
       p <- p + 
         dgamma(tau_star[1, j], shape = alpha_tau , rate = beta_tau, log = TRUE) + # prior
-        dgamma(taus[1,j,i], shape =beta_tau + ( beta_tau * tau_star[1, j]), rate = beta_tau, log = TRUE)  - # posterior
+        dgamma(taus[1,j,i], shape = beta_tau + tau_star[1, j], rate = beta_tau, log = TRUE)  - # posterior
         dgamma(taus[1,j,i], shape = alpha_tau, rate = beta_tau, log = TRUE) - # prior
-        dgamma(tau_star[1, j], shape = beta_tau + (beta_tau* taus[1,j,i]), rate = beta_tau, log = TRUE) # posterior
+        dgamma(tau_star[1, j], shape = (beta_tau + taus[1,j,i]), rate = beta_tau, log = TRUE) # posterior
     }
     
     
