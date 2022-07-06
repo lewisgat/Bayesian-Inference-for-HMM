@@ -48,9 +48,9 @@ HMM_Metropolis_Hastings2 <- function(x, iterations, Gamma0, tau0, alpha_gamma, a
       
       p <- p + 
         dgamma(tau_star[1, j], shape = alpha_tau , rate = beta_tau, log = TRUE) + # prior
-        dgamma(taus[1,j,i], shape = beta_tau + tau_star[1, j], rate = beta_tau, log = TRUE)  - # posterior
+        dgamma(taus[1,j,i], shape = beta_tau + tau_star[1, j], rate = beta_tau, log = TRUE)  - # proposal
         dgamma(taus[1,j,i], shape = alpha_tau, rate = beta_tau, log = TRUE) - # prior
-        dgamma(tau_star[1, j], shape = (beta_tau + taus[1,j,i]), rate = beta_tau, log = TRUE) # posterior
+        dgamma(tau_star[1, j], shape = (beta_tau + taus[1,j,i]), rate = beta_tau, log = TRUE) # proposal
     }
     
     
