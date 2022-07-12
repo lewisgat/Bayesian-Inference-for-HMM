@@ -1,4 +1,4 @@
-HMM_MH <- function(x, iterations, Gamma0, tau0, alpha_gamma, alpha_tau, beta_tau, beta_gamma){
+HMM_MH <- function(x, iterations, Gamma0, tau0, alpha_tau, beta_tau, alpha_gamma, beta_gamma){
   m <- dim(Gamma0)[1] # number of states in HMM
   acc <- rep(0, m+1) # acceptance rate of each row of Gamma and Taus
   
@@ -24,7 +24,7 @@ HMM_MH <- function(x, iterations, Gamma0, tau0, alpha_gamma, alpha_tau, beta_tau
              HMM_Log_Likelihood(x, as.matrix(Thetas[2:(m+1),,i]), as.vector(cumsum(Thetas[1,,i])) )   # likelihood of current
        
         # a0_1 <- (m*alpha_gamma) + sum(proposal[j, ])
-        # a0_2 <- (m*alpha_gamma) + sum(Thetas[j,,i]) 
+        # a0_2 <- (m*alpha_gamma) + sum(Thetas[j,,i])
         for (k in 1:m) {
           
           p <- p + 
@@ -32,11 +32,11 @@ HMM_MH <- function(x, iterations, Gamma0, tau0, alpha_gamma, alpha_tau, beta_tau
           # dbeta(Thetas[j,k,i], shape1 = alpha_gamma + proposal[j, k], shape2 = a0_1 - alpha_gamma - (proposal[j, k]), log = TRUE) + # proposal
           # dbeta(Thetas[j,k,i], shape1 = alpha_gamma, shape2 = (m-1)*alpha_gamma , log = TRUE) - # prior
           # dbeta(proposal[j, k], shape1 = alpha_gamma + Thetas[j,k,i], shape2 = a0_2 - alpha_gamma - (Thetas[j,k,i]), log = TRUE) # current
-            
+
           dbeta(proposal[j, k], shape1 = alpha_gamma, shape2 =  beta_gamma, log = TRUE) + # prior
           dbeta(Thetas[j,k,i], shape1 = alpha_gamma + proposal[j, k], shape2 = beta_gamma, log = TRUE) + # proposal
           dbeta(Thetas[j,k,i], shape1 = alpha_gamma, shape2 = beta_gamma , log = TRUE) - # prior
-          dbeta(proposal[j, k], shape1 = alpha_gamma + Thetas[j,k,i], shape2 = beta_gamma, log = TRUE) # current
+          dbeta(proposal[j, k], shape1 = alpha_gamma + Thetas[j,k,i], shape2 = beta_gamma, log = TRUE) # proposal 
         
         }
         
